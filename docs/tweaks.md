@@ -134,7 +134,7 @@ Shared:
                   Intelligence's model (iOS 26 where it is on and speaks the language; permissive guardrails for changing
                   the user's own text, 12 lines a session, greedy and capped at 60 tokens a line, exactly one string a line by a generation schema; Translate retried once, as its first ask can fail while it loads), both in
                   OnDeviceTranslation.swift, the frameworks weak linked; and by Gemini on the user's own key (Keychain),
-                  whose prompt and menu item say the lyrics go to Google. The translate items show only for a song NaturalLanguage finds in another language than the Lyrics page's (or the iPhone's). Apple Intelligence's lines show and are saved a batch at a time, only lines without a translation are sent, and a batch it turns down is skipped (asking again sends only those lines). Every finished translation is kept by SavedTranslations.m in Caches/Vitrine/Translations, one JSON file a song and language mapping each line's text to its translation, the newest 200, applied when the song's lines are next shown; the Lyrics page's Saved translations row counts them and deletes them. Gemini's reply read and checked on the Mac
+                  whose prompt and menu item say the lyrics go to Google. The translate items show only for a song NaturalLanguage finds in another language than the Lyrics page's (or the iPhone's): one distinct line in five it is at least 80% sure of, not the whole song's guess (short lines sway that: Havana reads as Dutch), so songs half in English count and a repeated chorus weighs as one line; Translate on iPhone translates from the language most of those lines are in and leaves lines already in the target as they are. Apple Intelligence's lines show and are saved a batch at a time, only lines without a translation are sent, and a batch it turns down is skipped (asking again sends only those lines). Every finished translation is kept by SavedTranslations.m in Caches/Vitrine/Translations, one JSON file a song and language mapping each line's text to its translation, the newest 200, applied when the song's lines are next shown; the Lyrics page's Saved translations row counts them and deletes them. Gemini's reply read and checked on the Mac
                   against harness/lyrics-translation/
     LockScreenLyrics/ the line being sung in the system's now playing, and on iOS 26 the lyrics as the lock screen's
                   full-screen artwork (LyricsArtwork.x): a new artwork ID per line, its 3:4 H.264 clip (the line and the
@@ -580,6 +580,24 @@ A hook reads its switch when it runs (`SGEnabled`, `SGHidden`, `SGFlag` from Cor
 change shows after Spotify restarts; the tab editor on the Navbar page is the exception and applies as soon as the bar lays
 out again, as are the Home gradient's color, strength and height, but not the switch that turns it on, and Vibrations
 and Live Activity. The root page in `App/ModSettings.x` links the Appearance page and the page of each part of Spotify, and only the stored look's.
+
+## Planned lossless sources
+
+The researched design is in [Lossless sources and automatic upgrades](lossless-sources.md), including
+pinned BitChord/Monochrome sources, the HTTP contract, playback integration choices and acceptance tests.
+It targets immediate Spotify playback followed by a prepared FLAC/ALAC upgrade at the current position,
+with separate Wi-Fi and cellular ceilings. Use HTTP/JSON addons; no downloaded provider JavaScript runs
+inside the app. Resolution and settings would live in `Shared/Lossless/`, shared by both looks, with
+look-specific player presentation kept separate. This is not implemented: player-state observation and
+the existing PCM hook do not establish a working external-stream handoff. Sing already owns the single
+`SGPlayerSetStage` slot. Prove synchronization, cancellation, output format and fallback before enabling
+automatic replacement; do not present provider access as a Spotify entitlement or an output-quality guarantee.
+The [addon compatibility notes](lossless-addons.md) cover the concrete self-hosted providers and
+unverified hosted-service leads, including secret URLs, ISRC matching, request budgets and client restrictions.
+The [playback investigation](lossless-playback.md) identifies a proposed source selector before Sing
+and static external-audio leads in Spotify 9.1.78. [harness/lossless](../harness/lossless/README.md) proves
+native file decode/seek on iOS 27's simulator and records HTTP-reader, container and EOF limits.
+These experiments do not establish synchronized Spotify playback or support on older iOS versions.
 
 ## Make targets
 
